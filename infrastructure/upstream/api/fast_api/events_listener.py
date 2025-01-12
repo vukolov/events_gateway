@@ -1,13 +1,13 @@
 from fastapi import FastAPI, Depends
-from application.upstream.metrics.abstract_events_listener import AbstractEventsListener
+from entities.upstream.metrics.abstract_events_listener import AbstractEventsListener
 from entities.storages.events_storage import EventsStorage
-from entities.storages.users_storage import UsersStorage
+from entities.storages.abstract_users_storage import AbstractUsersStorage
 from .routers import auth
 from .routers import metrics
 
 
 class EventsListener(AbstractEventsListener):
-    def __init__(self, events_storage: EventsStorage, users_storage: UsersStorage):
+    def __init__(self, events_storage: EventsStorage, users_storage: AbstractUsersStorage):
         super().__init__(events_storage, users_storage)
         app = FastAPI()
 

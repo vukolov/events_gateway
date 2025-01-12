@@ -1,4 +1,4 @@
-from application.downstream.metrics.abstract_destination import AbstractDestination
+from entities.downstream.metrics.abstract_destination import AbstractDestination
 
 
 class MessageProcessor:
