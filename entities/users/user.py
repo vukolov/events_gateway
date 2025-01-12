@@ -5,3 +5,4 @@ class User:
         self.full_name: str | None = None
         self.active: bool = True
         self.hashed_password: str | None = None
+        self.plan_id: int | None = None

@@ -1,19 +1,19 @@
-from entities.downstream.metrics.abstract_destination import AbstractDestination
-from entities.storages.events_storage import EventsStorage
-from kafka import KafkaProducer
+from kafka import KafkaProducer as KafkaProducerLib
 import json
+from entities.storages.events_storage import AbstractEventsStorage
+from infrastructure.downstream.storages.metric_events.kafka.kafka_session import KafkaSession
 
 
-class Kafka(AbstractDestination, EventsStorage):
+class KafkaProducer(AbstractEventsStorage):
     def __init__(self, address: str):
         super().__init__(address)
-        self._producer = KafkaProducer(
+        self._producer = KafkaProducerLib(
             bootstrap_servers=address,
             value_serializer=lambda v: json.dumps(v).encode("utf-8")
         )
 
-    def create_session(self):
-        return self
+    def create_session(self) -> KafkaSession:
+        return KafkaSession(self._producer)
 
     def close(self):
         self._producer.flush()

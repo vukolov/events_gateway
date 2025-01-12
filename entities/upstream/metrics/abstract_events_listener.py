@@ -1,10 +1,10 @@
 from abc import ABCMeta, abstractmethod
-from entities.storages.events_storage import EventsStorage
-from entities.storages.abstract_users_storage import AbstractUsersStorage
+from entities.storages.events_storage import AbstractEventsStorage
+from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
 
 
 class AbstractEventsListener(metaclass=ABCMeta):
-    def __init__(self, events_storage: EventsStorage, users_storage: AbstractUsersStorage):
+    def __init__(self, events_storage: AbstractEventsStorage, users_storage: AbstractEntitiesStorage):
         self._events_storage = events_storage
         self._users_storage = users_storage
 

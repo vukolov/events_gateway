@@ -1,5 +1,6 @@
-from .abstract_storage import AbstractStorage
+from abc import ABCMeta, abstractmethod
+from entities.storages.abstract_storage import AbstractStorage
 
 
-class EventsStorage(AbstractStorage):
+class AbstractEventsStorage(AbstractStorage, metaclass=ABCMeta):
     ...
