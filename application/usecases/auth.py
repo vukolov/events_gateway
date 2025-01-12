@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 import jwt
-from entities.storages.users_storage import UsersStorage
+from entities.storage_sessions.abstract_users_storage_session import AbstractUsersStorageSession
 from entities.user import User
 
 
@@ -13,7 +13,7 @@ class Auth:
     def __init__(self):
         self._pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def authenticate_user(self, username: str, password: str, users_storage_session: UsersStorage) -> User | bool:
+    def authenticate_user(self, username: str, password: str, users_storage_session: AbstractUsersStorageSession) -> User | bool:
         user = users_storage_session.get_user(username)
         if user is None:
             return False
@@ -28,7 +28,7 @@ class Auth:
         encoded_jwt = jwt.encode(to_encode, Auth.SECRET_KEY, algorithm=Auth.ALGORITHM)
         return encoded_jwt
 
-    def get_user(self, token: str, users_storage_session: UsersStorage) -> User:
+    def get_user(self, token: str, users_storage_session: AbstractUsersStorageSession) -> User:
         payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
         username: str = payload.get("sub")
         if username is None:

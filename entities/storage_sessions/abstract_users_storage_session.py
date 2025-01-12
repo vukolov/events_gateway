@@ -1,12 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from entities.storage_sessions.abstract_storage_session import AbstractStorageSession
+from entities.user import User
 
 
-class AbstractStorage(metaclass=ABCMeta):
+class AbstractUsersStorageSession(AbstractStorageSession, metaclass=ABCMeta):
     @abstractmethod
-    def create_session(self) -> AbstractStorageSession:
-        ...
-
-    @abstractmethod
-    def close(self):
+    def get_user(self, username: str) -> User:
         ...
