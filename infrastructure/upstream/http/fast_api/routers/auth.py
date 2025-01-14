@@ -4,7 +4,7 @@ from jwt.exceptions import InvalidTokenError
 from typing import Annotated
 from application.usecases.auth import Auth
 from adapters.api.users.token import Token
-from entities.storage_sessions.abstract_users_storage_session import AbstractUsersStorageSession
+from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
@@ -16,7 +16,7 @@ router = APIRouter(
 
 @router.post("/token")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-                users_storage_session: Annotated[AbstractUsersStorageSession, Depends()]) -> Token:
+                users_storage_session: Annotated[AbstractEntitiesStorageSession, Depends()]) -> Token:
     auth = Auth()
     user = auth.authenticate_user(form_data.username, form_data.password, users_storage_session)
     if not user:
@@ -30,7 +30,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
-                           users_storage_session: Annotated[AbstractUsersStorageSession, Depends()]):
+                           users_storage_session: Annotated[AbstractEntitiesStorageSession, Depends()]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
