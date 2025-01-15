@@ -5,7 +5,7 @@ from adapters.api.metrics.metric_event import MetricEvent
 from entities.users.user import User as UserEntity
 from entities.storage_sessions.abstract_metric_events_storage_session import AbstractMetricEventsStorageSession
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
-from application.usecases.message_processor import MessageProcessor
+from application.usecases.metric_events_processor import MetricEventsProcessor
 
 
 router = APIRouter(
@@ -22,8 +22,8 @@ async def receive_metric(event: MetricEvent,
                          metric_events_storage_session: Annotated[AbstractMetricEventsStorageSession, Depends()],
                          status_code=status.HTTP_201_CREATED):
     try:
-        message_processor = MessageProcessor(entities_storage_session, metric_events_storage_session, user)
-        message_processor.process(event.to_entity())
+        message_processor = MetricEventsProcessor(entities_storage_session, metric_events_storage_session, user)
+        message_processor.send_to_downstream(event.to_entity())
         return {"status": "success", "message": "Metric sent to Kafka"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
