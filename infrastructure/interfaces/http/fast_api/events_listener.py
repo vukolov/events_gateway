@@ -2,8 +2,8 @@ from fastapi import FastAPI, Depends
 from entities.upstream.metrics.abstract_events_listener import AbstractEventsListener
 from entities.storages.events_storage import AbstractEventsStorage
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
-from .routers import auth
-from .routers import metrics
+from .routers_upstream import auth
+from .routers_upstream import metrics
 
 
 class EventsListener(AbstractEventsListener):

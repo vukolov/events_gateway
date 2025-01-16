@@ -1,17 +1,16 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
-import jwt
+from application.security.abstract_token_encoder import AbstractTokenEncoder
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.users.user import User
 
 
 class Auth:
-    SECRET_KEY = "49b76e094faa6ca2556c818166b7a2244b93f7099f6f0f4caa6cf63b88e8d3e2"
-    ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-    def __init__(self):
+    def __init__(self, token_encoder: AbstractTokenEncoder):
         self._pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self._token_encoder = token_encoder
 
     def authenticate_user(self, username: str, password: str, users_storage_session: AbstractEntitiesStorageSession) -> User | bool:
         user = users_storage_session.get_user(username)
@@ -21,15 +20,15 @@ class Auth:
             return False
         return user
 
-    def create_access_token(self, data: dict) -> str:
-        to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, Auth.SECRET_KEY, algorithm=Auth.ALGORITHM)
-        return encoded_jwt
+    def create_access_token(self, user: User) -> str:
+        to_encode = {
+            "sub": user.username,
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES),
+        }
+        return self._token_encoder.encode(to_encode)
 
     def get_user(self, token: str, users_storage_session: AbstractEntitiesStorageSession) -> User:
-        payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+        payload = self._token_encoder.decode(token)
         username: str = payload.get("sub")
         if username is None:
             raise Exception("Could not validate credentials")
