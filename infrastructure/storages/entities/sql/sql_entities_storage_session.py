@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-
+from uuid import UUID
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.users.user import User as UserEntity
 from entities.metrics.metric import Metric as MetricEntity
@@ -17,8 +17,8 @@ class SqlEntitiesStorageSession(AbstractEntitiesStorageSession):
         statement = select(UserModel).where(UserModel.username == username)
         return self._sqlmodel_session.exec(statement).one().to_entity()
 
-    def get_metric(self, metric_uuid: str) -> MetricEntity:
-        statement = select(MetricModel).where(MetricModel.uuid == uid)
+    def get_metric(self, metric_uuid: UUID) -> MetricEntity:
+        statement = select(MetricModel).where(MetricModel.uuid == metric_uuid)
         return self._sqlmodel_session.exec(statement).one().to_entity()
 
     def get_metric_group(self, group_id: int) -> MetricGroupEntity:

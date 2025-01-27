@@ -1,6 +1,6 @@
 from kafka import KafkaProducer as KafkaProducerLib
 import json
-from entities.storages.events_storage import AbstractEventsStorage
+from entities.storages.abstract_events_storage import AbstractEventsStorage
 from infrastructure.downstream.storages.metric_events.kafka.kafka_session import KafkaSession
 
 

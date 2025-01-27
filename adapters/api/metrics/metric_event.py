@@ -11,6 +11,7 @@ class MetricEvent(BaseModel):
 
     def to_entity(self) -> MetricEventEntity:
         return MetricEventEntity(
+            metric_id=None,
             metric_group_id=None,
             metric_uuid=self.metric_uuid,
             event_time=self.event_time,

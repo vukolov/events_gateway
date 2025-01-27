@@ -1,4 +1,4 @@
-from entities.storages.events_storage import AbstractEventsStorage
+from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storage_sessions.abstract_metric_events_storage_session import AbstractMetricEventsStorageSession
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.users.user import User as UserEntity

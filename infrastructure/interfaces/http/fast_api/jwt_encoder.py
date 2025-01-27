@@ -16,7 +16,7 @@ class JwtEncoder(AbstractTokenEncoder):
         try:
             data = jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
         except InvalidTokenError:
-            raise InvalidTokenException
+            raise InvalidTokenException("Invalid token")
         except Exception:
             raise
         return data

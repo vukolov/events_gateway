@@ -1,27 +1,29 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from entities.upstream.metrics.abstract_events_listener import AbstractEventsListener
-from entities.storages.events_storage import AbstractEventsStorage
+from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
-from .routers_upstream import auth
-from .routers_upstream import metrics
+from .routers_upstream.metrics import init_metrics_router
+from .routers_upstream.auth import init_auth_router
 
 
 class EventsListener(AbstractEventsListener):
     def __init__(self, events_storage: AbstractEventsStorage, entities_storage: AbstractEntitiesStorage):
         super().__init__(events_storage, entities_storage)
-        app = FastAPI()
 
-        app.include_router(auth.router, dependencies=[Depends(entities_storage.create_session)])
-        app.include_router(metrics.router, dependencies=[
-            Depends(entities_storage.create_session),
-            Depends(events_storage.create_session)])
-
-        @app.on_event("shutdown")
-        async def shutdown_event():
+        @asynccontextmanager
+        async def lifespan(app: FastAPI):
+            yield
             entities_storage.close()
             events_storage.close()
 
+        app = FastAPI(lifespan=lifespan)
+        app.include_router(init_auth_router(entities_storage))
+        app.include_router(init_metrics_router(entities_storage, events_storage))
         self._app = app
 
     def run(self):
         ...
+
+    def get_instance(self) -> FastAPI:
+        return self._app

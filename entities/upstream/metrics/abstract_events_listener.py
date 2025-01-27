@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from entities.storages.events_storage import AbstractEventsStorage
+from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
 
 
@@ -10,4 +10,8 @@ class AbstractEventsListener(metaclass=ABCMeta):
 
     @abstractmethod
     def run(self):
+        ...
+
+    @abstractmethod
+    def get_instance(self) -> object:
         ...

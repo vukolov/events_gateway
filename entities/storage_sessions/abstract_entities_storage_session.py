@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from uuid import UUID
 from entities.storage_sessions.abstract_storage_session import AbstractStorageSession
 from entities.users.user import User
 from entities.metrics.metric import Metric
@@ -11,7 +12,7 @@ class AbstractEntitiesStorageSession(AbstractStorageSession, metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    def get_metric(self, metric_uuid: str) -> Metric:
+    def get_metric(self, metric_uuid: UUID) -> Metric:
         ...
 
     @abstractmethod
