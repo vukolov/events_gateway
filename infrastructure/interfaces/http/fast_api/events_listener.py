@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from entities.upstream.metrics.abstract_events_listener import AbstractEventsListener
 from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
-from .routers_upstream.metrics import init_metrics_router
-from .routers_upstream.auth import init_auth_router
+from infrastructure.interfaces.http.fast_api.routers_upstream.v1.events import init_events_router
+from infrastructure.interfaces.http.fast_api.routers_common.v1.auth import init_auth_router
 
 
 class EventsListener(AbstractEventsListener):
@@ -19,7 +19,7 @@ class EventsListener(AbstractEventsListener):
 
         app = FastAPI(lifespan=lifespan)
         app.include_router(init_auth_router(entities_storage))
-        app.include_router(init_metrics_router(entities_storage, events_storage))
+        app.include_router(init_events_router(entities_storage, events_storage))
         self._app = app
 
     def run(self):

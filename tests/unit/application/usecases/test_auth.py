@@ -1,66 +1,69 @@
+import os
+import uuid
+import secrets
 import pytest
 from application.usecases.auth import Auth
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
-from application.security.abstract_token_encoder import AbstractTokenEncoder
-from application.exceptions.security.invalid_token import InvalidToken as InvalidTokenException
-from entities.users.user import User
+from entities.clients.external_client import ExternalClient
+from infrastructure.interfaces.http.fast_api.jwt_encoder import JwtEncoder
+
+
+client_uuid = uuid.UUID("f9ac15f6-a98d-402e-9417-31d028460066")
+client_secret = secrets.token_urlsafe(64)
+hashed_secret = Auth.hash_secret(client_secret)
 
 
 @pytest.fixture
-def users_storage_session(mocker):
+def entities_storage_session(mocker):
     mock = mocker.Mock(spec=AbstractEntitiesStorageSession)
 
-    def get_user_side_effect(user_name):
-        if user_name == 'test_user':
-            user = User()
-            user.username = user_name
-            user.hashed_password = Auth.hash_password("correct_password")
-            return user
+    def get_client_side_effect(client_uuid_):
+        if client_uuid_ == client_uuid:
+            client = ExternalClient(uuid=client_uuid_)
+            client.hashed_secret = hashed_secret
+            client.description = "test_client"
+            return client
         else:
             return None
 
-    mock.get_user.side_effect = get_user_side_effect
+    mock.get_external_client.side_effect = get_client_side_effect
     return mock
 
-
-@pytest.fixture
-def token_encoder(mocker):
-    mock = mocker.Mock(spec=AbstractTokenEncoder)
-
-    def encode_side_effect(to_encode: dict):
-        return to_encode['sub'] + "_token"
-
-    def decode_side_effect(token: str):
-        if token == "invalid_token":
-            raise InvalidTokenException("Invalid token")
-        return {"sub": token.replace("_token", "")}
-
-    mock.encode.side_effect = encode_side_effect
-    mock.decode.side_effect = decode_side_effect
-    return mock
-
-
-def test_authenticate_user(users_storage_session, token_encoder, mocker):
+def test_authenticate_external_client(entities_storage_session):
+    token_encoder = JwtEncoder("123", "HS256")
     auth = Auth(token_encoder)
-    assert auth.authenticate_user("not_existed_user", "", users_storage_session) is False
-    assert auth.authenticate_user("test_user", "wrong_password", users_storage_session) is False
-    user = auth.authenticate_user("test_user", "correct_password", users_storage_session)
-    assert isinstance(user, User)
-    assert user.username == "test_user"
+    os.environ["EFA_CLI_SECRET_KEY"] = "some_secret"
+    cli = auth.authenticate_external_client("cli", "some_secret", entities_storage_session)
+    assert isinstance(cli, ExternalClient)
+
+    not_existing_client = ExternalClient()
+    assert auth.authenticate_external_client(str(not_existing_client.uuid), "", entities_storage_session) is False
+
+    assert auth.authenticate_external_client(str(client_uuid), "wrong_secret", entities_storage_session) is False
+    client = auth.authenticate_external_client(str(client_uuid), client_secret, entities_storage_session)
+    assert isinstance(client, ExternalClient)
+    assert client.description == "test_client"
 
 
-def test_create_access_token(token_encoder):
+def test_create_client_access_token():
+    token_encoder = JwtEncoder("123", "HS256")
     auth = Auth(token_encoder)
-    user = User()
-    user.username = "test_user"
-    token = auth.create_access_token(user)
-    assert token == "test_user_token"
+    client = ExternalClient(uuid=client_uuid)
+    token = auth.create_client_access_token(client)
+    decoded_token = token_encoder.decode(token)
+    assert client.uuid == uuid.UUID(decoded_token["sub"])
 
 
-def test_get_user(users_storage_session, token_encoder):
+def test_get_client(entities_storage_session):
+    token_encoder = JwtEncoder("123", "HS256")
     auth = Auth(token_encoder)
-    with pytest.raises(InvalidTokenException) as e:
-        auth.get_user("invalid_token", users_storage_session)
-    user = auth.get_user("test_user_token", users_storage_session)
-    assert isinstance(user, User)
-    assert user.username == "test_user"
+    client = ExternalClient(uuid=client_uuid)
+    token = auth.create_client_access_token(client)
+    found_client = auth.get_client(token, entities_storage_session)
+    assert isinstance(found_client, ExternalClient)
+    assert found_client.uuid == client.uuid
+
+    unknown_client = ExternalClient(uuid=uuid.uuid4())
+    token = auth.create_client_access_token(unknown_client)
+    with pytest.raises(Exception) as e:
+        auth.get_client(token, entities_storage_session)

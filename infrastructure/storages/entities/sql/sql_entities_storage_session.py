@@ -2,9 +2,11 @@ from sqlmodel import Session, select
 from uuid import UUID
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.users.user import User as UserEntity
+from entities.clients.external_client import ExternalClient as ExternalClientEntity
 from entities.metrics.metric import Metric as MetricEntity
 from entities.metrics.metric_group import MetricGroup as MetricGroupEntity
 from adapters.storage.sql_models.user import User as UserModel
+from adapters.storage.sql_models.external_client import ExternalClient as ExternalClientModel
 from adapters.storage.sql_models.metric import Metric as MetricModel
 from adapters.storage.sql_models.metric_group import MetricGroup as MetricGroupModel
 
@@ -15,6 +17,10 @@ class SqlEntitiesStorageSession(AbstractEntitiesStorageSession):
 
     def get_user(self, username: str) -> UserEntity:
         statement = select(UserModel).where(UserModel.username == username)
+        return self._sqlmodel_session.exec(statement).one().to_entity()
+
+    def get_external_client(self, client_uuid: UUID) -> ExternalClientEntity:
+        statement = select(ExternalClientModel).where(ExternalClientModel.uuid == client_uuid)
         return self._sqlmodel_session.exec(statement).one().to_entity()
 
     def get_metric(self, metric_uuid: UUID) -> MetricEntity:

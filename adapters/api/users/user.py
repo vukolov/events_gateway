@@ -1,9 +1,9 @@
-from sqlmodel import SQLModel, Field
+from pydantic import BaseModel
 from entities.users.user import User as UserEntity
 
 
-class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class User(BaseModel):
+    id: int | None
     username: str
     email: str
     full_name: str

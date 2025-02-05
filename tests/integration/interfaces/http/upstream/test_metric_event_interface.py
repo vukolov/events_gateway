@@ -7,9 +7,10 @@ from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.storage_sessions.abstract_metric_events_storage_session import AbstractMetricEventsStorageSession
 from entities.users.user import User as UserEntity
+from entities.clients.external_client import ExternalClient as ClientEntity
 from entities.metrics.metric import Metric
 from infrastructure.interfaces.http.fast_api.events_listener import EventsListener
-import infrastructure.interfaces.http.fast_api.routers_upstream.auth as auth
+import infrastructure.interfaces.http.fast_api.routers_common.v1.auth as auth
 
 
 @pytest.fixture
@@ -57,13 +58,13 @@ async def client(entities_storage, events_storage):
     app = events_listener.get_instance()
     app.dependency_overrides[entities_storage.create_session] = lambda: entities_storage.create_session()
     app.dependency_overrides[events_storage.create_session] = lambda: events_storage.create_session()
-    app.dependency_overrides[auth.get_current_user] = lambda: UserEntity()
+    app.dependency_overrides[auth.get_current_client] = lambda: ClientEntity()
 
     return TestClient(app)
 
 
 def test_metrics_event(client, monkeypatch):
-    monkeypatch.setattr(Auth, "get_user", lambda *args: UserEntity())
+    monkeypatch.setattr(Auth, "authenticate_external_client", lambda *args: ClientEntity())
     monkeypatch.setattr(MetricEventsProcessor, "send_to_downstream", lambda *args: None)
     # Define the payload for the event
     payload = {
@@ -72,7 +73,7 @@ def test_metrics_event(client, monkeypatch):
         "metric_value": 0.01,
     }
     # Send a POST request to the events listener endpoint
-    response = client.post("/metrics/event", json=payload)
+    response = client.post("/v1/events", json=payload)
 
     # Check the response status code and content
     assert response.status_code == 201
@@ -80,10 +81,10 @@ def test_metrics_event(client, monkeypatch):
 
 
 def test_auth_token(client, entities_storage, monkeypatch):
-    monkeypatch.setattr(Auth, "authenticate_user", lambda *args: UserEntity())
-    monkeypatch.setattr(Auth, "create_access_token", lambda *args: "test_token")
-    response = client.post("/auth/token",
-                           data={"username": "test", "password": "test"},
+    monkeypatch.setattr(Auth, "authenticate_external_client", lambda *args: ClientEntity())
+    monkeypatch.setattr(Auth, "create_client_access_token", lambda *args: "test_token")
+    response = client.post("/v1/auth/token",
+                           data={"client_id": "cli", "client_secret": "test"},
                            headers={"Content-Type": "application/x-www-form-urlencoded"})
     assert response.status_code == 200
     assert response.json() == {"access_token": "test_token", "token_type": "bearer"}

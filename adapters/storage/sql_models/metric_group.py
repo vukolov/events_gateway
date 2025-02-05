@@ -1,11 +1,11 @@
-import uuid
+from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field
 from entities.metrics.metric_group import MetricGroup as MetricGroupEntity
 
 
 class MetricGroup(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    uuid: uuid.UUID = Field(default_factory=uuid.uuid4, index=True)
+    uuid: str = Field(default_factory=lambda: str(uuid4()), index=True)
     name: str
     user_id: int
     measure_frequency_id: int
@@ -13,7 +13,7 @@ class MetricGroup(SQLModel, table=True):
 
     def to_entity(self) -> MetricGroupEntity:
         return MetricGroupEntity(id=self.id,
-                                 uuid=self.uuid,
+                                 uuid=UUID(self.uuid),
                                  name=self.name,
                                  user_id=self.user_id,
                                  measure_frequency_id=self.measure_frequency_id,

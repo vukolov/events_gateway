@@ -7,13 +7,13 @@ from entities.storage_sessions.abstract_metric_events_storage_session import Abs
 from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from application.usecases.metric_events_processor import MetricEventsProcessor
 from adapters.api.metrics.metric_event import MetricEvent
-import infrastructure.interfaces.http.fast_api.routers_upstream.auth as auth
+import infrastructure.interfaces.http.fast_api.routers_common.v1.auth as auth
 
 
-def init_metrics_router(entities_storage: AbstractEntitiesStorage, metric_events_storage: AbstractEventsStorage):
+def init_events_router(entities_storage: AbstractEntitiesStorage, metric_events_storage: AbstractEventsStorage):
     router = APIRouter(
-        prefix="/metrics",
-        dependencies=[Depends(auth.get_current_user)],
+        prefix="/v1/events",
+        dependencies=[Depends(auth.get_current_client)],
         responses={status.HTTP_404_NOT_FOUND: {"description": "Not found"}},
     )
 
@@ -22,7 +22,7 @@ def init_metrics_router(entities_storage: AbstractEntitiesStorage, metric_events
     events_storage_dependency = Annotated[
         AbstractMetricEventsStorageSession, Depends(metric_events_storage.create_session)]
 
-    @router.post("/event", status_code=status.HTTP_201_CREATED)
+    @router.post("/", status_code=status.HTTP_201_CREATED)
     async def receive_metric(event: MetricEvent,
                              user: Annotated[UserEntity, Depends()],
                              entities_storage_session: entities_storage_session_dependency,

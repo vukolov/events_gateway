@@ -6,7 +6,6 @@ from infrastructure.downstream.storages.metric_events.kafka.kafka_session import
 
 class KafkaProducer(AbstractEventsStorage):
     def __init__(self, address: str):
-        super().__init__(address)
         self._producer = KafkaProducerLib(
             bootstrap_servers=address,
             value_serializer=lambda v: json.dumps(v).encode("utf-8")
