@@ -1,9 +1,10 @@
-# Byte-compiled / optimized / DLL files
 .idea/
-__pycache__/
 configs/.env.dev
 configs/.env.test
 configs/.env.prod
+configs/.env.integration_tests
+# Byte-compiled / optimized / DLL files
+__pycache__/
 *.py[cod]
 *$py.class
 

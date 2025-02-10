@@ -27,6 +27,14 @@ class SqlEntitiesStorageSession(AbstractEntitiesStorageSession):
         statement = select(MetricModel).where(MetricModel.uuid == metric_uuid)
         return self._sqlmodel_session.exec(statement).one().to_entity()
 
+    def add_metric(self, metric_entity: MetricEntity) -> MetricEntity:
+        metric = MetricModel.from_entity(metric_entity)
+        self._sqlmodel_session.add(metric)
+        self._sqlmodel_session.flush()
+        self._sqlmodel_session.refresh(metric)
+        self._sqlmodel_session.commit()
+        return metric.to_entity()
+
     def get_metric_group(self, group_id: int) -> MetricGroupEntity:
         statement = select(MetricGroupModel).where(MetricGroupModel.id == group_id)
         return self._sqlmodel_session.exec(statement).one().to_entity()

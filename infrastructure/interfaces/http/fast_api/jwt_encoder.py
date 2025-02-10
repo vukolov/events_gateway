@@ -6,6 +6,8 @@ from application.exceptions.security.invalid_token import InvalidToken as Invali
 
 class JwtEncoder(AbstractTokenEncoder):
     def __init__(self, secret_key: str, algorithm: str):
+        assert secret_key is not None, "Secret key must be provided"
+        assert algorithm is not None, "Algorithm must be provided"
         self._secret_key = secret_key
         self._algorithm = algorithm
 

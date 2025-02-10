@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 import secrets
 
 
@@ -12,5 +12,5 @@ class ExternalClient:
         self.secret: str | None = None
         self.description: str | None = None
         if self.uuid is None:
-            self.uuid = UUID(int=0)
+            self.uuid = uuid4()
             self.secret = secrets.token_urlsafe(64)

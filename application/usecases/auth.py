@@ -1,5 +1,4 @@
 import os
-
 import bcrypt
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
@@ -18,7 +17,7 @@ class Auth:
     def authenticate_external_client(self, client_uuid: str, client_secret: str, clients_storage_session: AbstractEntitiesStorageSession) -> ExternalClient | bool:
         if client_uuid == self.EFA_CONFIGURATION_CLIENT_ID:
             if client_secret == os.getenv("EFA_CLI_SECRET_KEY"):
-                return ExternalClient()
+                return ExternalClient(uuid=UUID(int=0))
             return False
         try:
             client_uuid = UUID(client_uuid)
@@ -41,10 +40,13 @@ class Auth:
 
     def get_client(self, token: str, clients_storage_session: AbstractEntitiesStorageSession) -> ExternalClient:
         payload = self._token_encoder.decode(token)
-        uuid: str = payload.get("sub")
-        if uuid is None:
+        uuid_str: str = payload.get("sub")
+        if uuid_str is None:
             raise Exception("Could not validate credentials")
-        client = clients_storage_session.get_external_client(UUID(uuid))
+        uuid = UUID(uuid_str)
+        if uuid == UUID(int=0):
+            return ExternalClient(uuid=uuid)
+        client = clients_storage_session.get_external_client(uuid)
         if client is None:
             raise Exception("No such client")
         return client

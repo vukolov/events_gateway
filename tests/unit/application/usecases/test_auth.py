@@ -33,8 +33,11 @@ def test_authenticate_external_client(entities_storage_session):
     token_encoder = JwtEncoder("123", "HS256")
     auth = Auth(token_encoder)
     os.environ["EFA_CLI_SECRET_KEY"] = "some_secret"
-    cli = auth.authenticate_external_client("cli", "some_secret", entities_storage_session)
+    cli = auth.authenticate_external_client(Auth.EFA_CONFIGURATION_CLIENT_ID,
+                                            "some_secret",
+                                            entities_storage_session)
     assert isinstance(cli, ExternalClient)
+    assert cli.uuid == uuid.UUID(int=0)
 
     not_existing_client = ExternalClient()
     assert auth.authenticate_external_client(str(not_existing_client.uuid), "", entities_storage_session) is False

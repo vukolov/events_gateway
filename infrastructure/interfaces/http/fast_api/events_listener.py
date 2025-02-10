@@ -4,7 +4,8 @@ from entities.upstream.metrics.abstract_events_listener import AbstractEventsLis
 from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
 from infrastructure.interfaces.http.fast_api.routers_upstream.v1.events import init_events_router
-from infrastructure.interfaces.http.fast_api.routers_common.v1.auth import init_auth_router
+from infrastructure.interfaces.http.fast_api.routers_common.v1.auth import init_auth_router, TokenChecker
+from infrastructure.interfaces.http.fast_api.routers_config.v1.metrics import init_metrics_router
 
 
 class EventsListener(AbstractEventsListener):
@@ -17,9 +18,12 @@ class EventsListener(AbstractEventsListener):
             entities_storage.close()
             events_storage.close()
 
+        token_checker = TokenChecker(entities_storage)
+
         app = FastAPI(lifespan=lifespan)
         app.include_router(init_auth_router(entities_storage))
-        app.include_router(init_events_router(entities_storage, events_storage))
+        app.include_router(init_metrics_router(token_checker))
+        app.include_router(init_events_router(token_checker, events_storage))
         self._app = app
 
     def run(self):
