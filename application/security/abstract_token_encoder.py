@@ -4,7 +4,7 @@ from typing import Any
 
 class AbstractTokenEncoder(metaclass=ABCMeta):
     @abstractmethod
-    def encode(self, data: dict) -> str:
+    def encode(self, data: dict[str, Any]) -> str:
         ...
 
     @abstractmethod

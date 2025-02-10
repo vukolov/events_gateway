@@ -13,6 +13,6 @@ class SqlEntitiesStorage(AbstractEntitiesStorage):
         with Session(self._engine) as sqlmodel_session:
             yield SqlEntitiesStorageSession(sqlmodel_session)
 
-    def close(self):
+    def close(self) -> None:
         """No need to close session for this case"""
         ...

@@ -1,3 +1,4 @@
+from typing import Any
 import jwt
 from jwt.exceptions import InvalidTokenError
 from application.security.abstract_token_encoder import AbstractTokenEncoder
@@ -11,7 +12,7 @@ class JwtEncoder(AbstractTokenEncoder):
         self._secret_key = secret_key
         self._algorithm = algorithm
 
-    def encode(self, data: dict) -> str:
+    def encode(self, data: dict[str, Any]) -> str:
         return jwt.encode(data, self._secret_key, algorithm=self._algorithm)
 
     def decode(self, token: str) -> dict:

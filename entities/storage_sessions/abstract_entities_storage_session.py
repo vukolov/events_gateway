@@ -20,6 +20,7 @@ class AbstractEntitiesStorageSession(AbstractStorageSession, metaclass=ABCMeta):
     def get_metric(self, metric_uuid: UUID) -> Metric:
         ...
 
+    @abstractmethod
     def add_metric(self, metric_entity: Metric) -> Metric:
         ...
 

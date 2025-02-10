@@ -4,20 +4,6 @@ from pydantic import BaseModel
 from entities.metrics.metric import Metric as MetricEntity
 
 
-class MetricBase(BaseModel):
-    id: int | None = None
-    uuid: UUID | None = None
-    name: str
-    group_id: int | None = None
-    active: bool = False
-
-    def to_entity(self) -> MetricEntity:
-        return MetricEntity(id=self.id,
-                            uuid=self.uuid,
-                            name=self.name,
-                            group_id=self.group_id,
-                            active=self.active)
-
 class MetricCreate(BaseModel):
     name: str
 

@@ -16,7 +16,7 @@ class MetricEventsProcessor:
         self._metric_events_storage_session = metric_events_storage_session
         self._user = user
 
-    def send_to_downstream(self, metric_event: MetricEvent):
+    def send_to_downstream(self, metric_event: MetricEvent) -> None:
         metric_event = self._add_configuration_data(metric_event)
         topic = self._chose_storage_topic(metric_event)
         self._metric_events_storage_session.save_event(metric_event, topic)

@@ -1,6 +1,6 @@
 import os
 from fastapi import APIRouter, Depends, status, HTTPException, Form, Security
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import RedirectResponse
 from typing import Annotated
 from infrastructure.interfaces.http.fast_api.jwt_encoder import JwtEncoder

@@ -1,4 +1,4 @@
-import datetime
+from typing import Generator
 from pathlib import Path
 from datetime import datetime
 from entities.storages.abstract_events_storage import AbstractEventsStorage
@@ -10,8 +10,8 @@ class FileStorage(AbstractEventsStorage):
         Path(address).mkdir(parents=True, exist_ok=True)
         self._file_pointer = open(address + "/" + datetime.now().strftime("Y-m-d_H:M:S"), 'a')
 
-    def create_session(self) -> FileSession:
-        return FileSession(self._file_pointer)
+    def create_session(self) -> Generator[FileSession, None, None]:
+        yield FileSession(self._file_pointer)
 
-    def close(self):
+    def close(self) -> None:
         self._file_pointer.close()

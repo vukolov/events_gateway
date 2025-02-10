@@ -9,7 +9,7 @@ class AbstractEventsListener(metaclass=ABCMeta):
         self._users_storage = users_storage
 
     @abstractmethod
-    def run(self):
+    def run(self) -> None:
         ...
 
     @abstractmethod

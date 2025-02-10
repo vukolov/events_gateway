@@ -21,7 +21,6 @@ def init_metrics_router(token_checker: TokenChecker) -> APIRouter:
     async def create_metric(metric: MetricCreate, safe_session: auth_dependency):
         client, entities_storage_session = safe_session
         added_metric_entity = entities_storage_session.add_metric(metric.to_entity())
-        t = MetricPublic.from_entity(added_metric_entity)
-        return t
+        return MetricPublic.from_entity(added_metric_entity)
 
     return router

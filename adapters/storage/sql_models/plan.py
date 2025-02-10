@@ -7,5 +7,3 @@ class Plan(SQLModel, table=True):
     name: str
     description: str
 
-    def to_entity(self) -> UserEntity:
-        ...

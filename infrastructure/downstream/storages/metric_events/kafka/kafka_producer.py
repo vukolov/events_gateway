@@ -1,3 +1,4 @@
+from typing import Generator, Any
 from kafka import KafkaProducer as KafkaProducerLib
 import json
 from entities.storages.abstract_events_storage import AbstractEventsStorage
@@ -11,14 +12,14 @@ class KafkaProducer(AbstractEventsStorage):
             value_serializer=lambda v: json.dumps(v).encode("utf-8")
         )
 
-    def create_session(self) -> KafkaSession:
-        return KafkaSession(self._producer)
+    def create_session(self) -> Generator[KafkaSession, None, None]:
+        yield KafkaSession(self._producer)
 
-    def close(self):
+    def close(self) -> None:
         self._producer.flush()
         self._producer.close()
 
-    def send(self, message: dict, topic: str):
+    def send(self, message: dict[Any, Any], topic: str) -> None:
         self._producer.send(topic, value=message)
         # todo: is it necessary to flush every time?
         self._producer.flush()

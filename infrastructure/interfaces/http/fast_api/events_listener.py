@@ -26,7 +26,7 @@ class EventsListener(AbstractEventsListener):
         app.include_router(init_events_router(token_checker, events_storage))
         self._app = app
 
-    def run(self):
+    def run(self) -> None:
         ...
 
     def get_instance(self) -> FastAPI:
