@@ -15,7 +15,7 @@ class JwtEncoder(AbstractTokenEncoder):
     def encode(self, data: dict[str, Any]) -> str:
         return jwt.encode(data, self._secret_key, algorithm=self._algorithm)
 
-    def decode(self, token: str) -> dict:
+    def decode(self, token: str) -> Any:
         try:
             data = jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
         except InvalidTokenError:

@@ -1,10 +1,11 @@
 import os
 import bcrypt
+from typing import cast
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
-from application.security.abstract_token_encoder import AbstractTokenEncoder
-from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.clients.external_client import ExternalClient
+from application.security.abstract_token_encoder import AbstractTokenEncoder
+from application.storages.repositories.external_client import ExternalClient as ExternalClientRepo
 
 
 class Auth:
@@ -14,20 +15,20 @@ class Auth:
     def __init__(self, token_encoder: AbstractTokenEncoder):
         self._token_encoder = token_encoder
 
-    def authenticate_external_client(self, client_uuid: str, client_secret: str, clients_storage_session: AbstractEntitiesStorageSession) -> ExternalClient | bool:
-        if client_uuid == self.EFA_CONFIGURATION_CLIENT_ID:
+    def authenticate_external_client(self, client_uuid_str: str, client_secret: str, clients_repo: ExternalClientRepo) -> ExternalClient | None:
+        if client_uuid_str == self.EFA_CONFIGURATION_CLIENT_ID:
             if client_secret == os.getenv("EFA_CLI_SECRET_KEY"):
                 return ExternalClient(uuid=UUID(int=0))
-            return False
+            return None
         try:
-            client_uuid = UUID(client_uuid)
+            client_uuid = UUID(client_uuid_str)
         except ValueError:
-            return False
-        client = clients_storage_session.get_external_client(client_uuid)
-        if client is None:
-            return False
+            return None
+        client = cast(ExternalClient, clients_repo.get_by_uuid(client_uuid))
+        if client is None or client.hashed_secret is None:
+            return None
         if not self._verify_secret_key(client_secret, client.hashed_secret):
-            return False
+            return None
         return client
 
     def create_client_access_token(self, client: ExternalClient) -> str:
@@ -38,7 +39,7 @@ class Auth:
         }
         return self._token_encoder.encode(to_encode)
 
-    def get_client(self, token: str, clients_storage_session: AbstractEntitiesStorageSession) -> ExternalClient:
+    def get_client(self, token: str, clients_repo: ExternalClientRepo) -> ExternalClient:
         payload = self._token_encoder.decode(token)
         uuid_str: str = payload.get("sub")
         if uuid_str is None:
@@ -46,7 +47,7 @@ class Auth:
         uuid = UUID(uuid_str)
         if uuid == UUID(int=0):
             return ExternalClient(uuid=uuid)
-        client = clients_storage_session.get_external_client(uuid)
+        client = cast(ExternalClient, clients_repo.get_by_uuid(uuid))
         if client is None:
             raise Exception("No such client")
         return client

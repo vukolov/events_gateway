@@ -1,13 +1,13 @@
 from uuid import UUID, uuid4
 import secrets
+from entities.abstract_business_entity import AbstractBusinessEntity
 
 
-class ExternalClient:
+class ExternalClient(AbstractBusinessEntity):
     def __init__(self,
-                 id: int | None = None,
-                 uuid: UUID | None = None):
-        self.id: int | None = id
-        self.uuid: UUID | None = uuid
+                 uuid: UUID,
+                 id: int | None = None):
+        super().__init__(uuid=uuid, id=id)
         self.hashed_secret: str | None = None
         self.secret: str | None = None
         self.description: str | None = None

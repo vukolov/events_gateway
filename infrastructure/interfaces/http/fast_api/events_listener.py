@@ -1,5 +1,9 @@
+from types import ModuleType
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from collections.abc import AsyncIterator
+
 from entities.upstream.metrics.abstract_events_listener import AbstractEventsListener
 from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
@@ -9,21 +13,23 @@ from infrastructure.interfaces.http.fast_api.routers_config.v1.metrics import in
 
 
 class EventsListener(AbstractEventsListener):
-    def __init__(self, events_storage: AbstractEventsStorage, entities_storage: AbstractEntitiesStorage):
+    def __init__(self, events_storage: AbstractEventsStorage, entities_storage: AbstractEntitiesStorage, entities_repos_module: ModuleType):
         super().__init__(events_storage, entities_storage)
 
         @asynccontextmanager
-        async def lifespan(app: FastAPI):
-            yield
-            entities_storage.close()
-            events_storage.close()
+        async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+            try:
+                yield
+            finally:
+                entities_storage.close()
+                events_storage.close()
 
-        token_checker = TokenChecker(entities_storage)
+        token_checker = TokenChecker(entities_storage, entities_repos_module)
 
         app = FastAPI(lifespan=lifespan)
-        app.include_router(init_auth_router(entities_storage))
-        app.include_router(init_metrics_router(token_checker))
-        app.include_router(init_events_router(token_checker, events_storage))
+        app.include_router(init_auth_router(entities_storage, entities_repos_module))
+        app.include_router(init_metrics_router(token_checker, entities_repos_module))
+        app.include_router(init_events_router(token_checker, events_storage, entities_repos_module))
         self._app = app
 
     def run(self) -> None:

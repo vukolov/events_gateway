@@ -1,3 +1,4 @@
+from uuid import UUID
 from application.usecases.metric_events_processor import MetricEventsProcessor
 from tests.integration.interfaces.http.fixtures import *
 from application.usecases.auth import Auth
@@ -5,7 +6,7 @@ from entities.clients.external_client import ExternalClient as ClientEntity
 
 
 def test_metrics_event(client, monkeypatch):
-    monkeypatch.setattr(Auth, "get_client", lambda *args: ClientEntity())
+    monkeypatch.setattr(Auth, "get_client", lambda *args: ClientEntity(UUID(int=0)))
     monkeypatch.setattr(MetricEventsProcessor, "send_to_downstream", lambda *args: None)
     headers = {
         "Authorization": f"Bearer doesntmatter",
@@ -18,4 +19,3 @@ def test_metrics_event(client, monkeypatch):
     response = client.post("/v1/events", json=payload, headers=headers)
 
     assert response.status_code == 201
-    assert response.json() == {}

@@ -21,7 +21,7 @@ class MetricPublic(BaseModel):
     active: bool
 
     @staticmethod
-    def from_entity(metric: MetricEntity):
+    def from_entity(metric: MetricEntity) -> "MetricPublic":
         return MetricPublic(uuid=metric.uuid,
                             name=metric.name,
                             group_name='?',
