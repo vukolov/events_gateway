@@ -1,5 +1,6 @@
 from sqlmodel import Session, create_engine
 from typing import Generator
+from contextlib import contextmanager
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
 from infrastructure.storages.entities.sql.sql_entities_storage_session import SqlEntitiesStorageSession
 
@@ -11,6 +12,7 @@ class SqlEntitiesStorage(AbstractEntitiesStorage):
             raise ValueError("Connection string is not provided")
         self._engine = create_engine(connection_string)
 
+    @contextmanager
     def create_session(self) -> Generator[SqlEntitiesStorageSession, None, None]:
         with Session(self._engine) as sqlmodel_session:
             yield SqlEntitiesStorageSession(sqlmodel_session)

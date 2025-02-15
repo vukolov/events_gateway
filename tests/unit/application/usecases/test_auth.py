@@ -2,7 +2,6 @@ import os
 import secrets
 import pytest
 from uuid import UUID, uuid4
-from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.clients.external_client import ExternalClient
 from application.usecases.auth import Auth
 from application.storages.repositories.external_client import ExternalClient as ExternalClientRepo
@@ -17,11 +16,8 @@ hashed_secret = Auth.hash_secret(client_secret)
 @pytest.fixture
 def clients_storage_repo(mocker):
     client = ExternalClient(uuid=client_uuid)
-    # client.hashed_secret = hashed_secret
-    # client.description = "test_client"
     mock = mocker.Mock(spec=ExternalClientRepo)
     mock.get_by_id.return_value = client
-    # mock.get_by_uuid.return_value = client
 
     def get_client_side_effect(client_uuid_):
         if client_uuid_ == client_uuid:

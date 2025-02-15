@@ -53,6 +53,7 @@ def test_add_configuration_data(processor, entities_storage_session, mocker):
     metric_entity = mocker.Mock()
     metric_group_entity = mocker.Mock()
     metric_repo = mocker.Mock(spec=MetricRepo)
+
     #todo: rewrite this test based on actual implementation
 
     # entities_storage_session.get_metric.return_value = metric_entity

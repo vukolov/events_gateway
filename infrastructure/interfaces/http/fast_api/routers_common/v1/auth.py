@@ -1,5 +1,5 @@
 import os
-from typing import cast
+from typing import cast, Generator
 from types import ModuleType
 from fastapi import APIRouter, Depends, status, HTTPException, Form, Security
 from fastapi.security import OAuth2PasswordBearer
@@ -26,7 +26,11 @@ def init_auth_router(entities_storage: AbstractEntitiesStorage, entities_repos_m
         responses={status.HTTP_404_NOT_FOUND: {"description": "Not found"}},
     )
 
-    entities_storage_session_dependency = Annotated[AbstractEntitiesStorageSession, Depends(entities_storage.create_session)]
+    def get_entities_storage_session() -> Generator[AbstractEntitiesStorageSession, None, None]:
+        with entities_storage.create_session() as session:
+            yield cast(AbstractEntitiesStorageSession, session)
+
+    entities_storage_session_dependency = Annotated[AbstractEntitiesStorageSession, Depends(get_entities_storage_session)]
 
     @router.post("/token")
     async def generate_client_token(client_id: Annotated[str, Form()],
@@ -58,24 +62,12 @@ class TokenChecker:
 
     def get_safe_session(self, token: str = Security(oauth2_scheme_client)) -> tuple[ExternalClient, AbstractEntitiesStorageSession]:
         try:
-            session_gen = self._entities_storage.create_session()
-            entities_storage_session = cast(AbstractEntitiesStorageSession, next(session_gen))
-            try:
+            with self._entities_storage.create_session() as entities_storage_session:
+                entities_storage_session = cast(AbstractEntitiesStorageSession, entities_storage_session)
                 clients_repo = self._entities_repos_module.external_client.ExternalClient(entities_storage_session)
                 client = auth_usecase.get_client(token, clients_repo)
                 return client, entities_storage_session
-            finally:
-                session_gen.close()
         except InvalidTokenException:
             raise credentials_exception
         except Exception as e:
             raise e
-        # try:
-        #     entities_storage_session = cast(AbstractEntitiesStorageSession, next(self._entities_storage.create_session()))
-        #     clients_repo = self._entities_repos_module.external_client.ExternalClient(entities_storage_session)
-        #     client = auth_usecase.get_client(token, clients_repo)
-        # except InvalidTokenException:
-        #     raise credentials_exception
-        # except Exception as e:
-        #     raise e
-        # return client, entities_storage_session

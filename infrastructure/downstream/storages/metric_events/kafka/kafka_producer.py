@@ -1,4 +1,5 @@
 from typing import Generator, Any
+from contextlib import contextmanager
 from kafka import KafkaProducer as KafkaProducerLib
 import json
 from entities.storages.abstract_events_storage import AbstractEventsStorage
@@ -12,6 +13,7 @@ class KafkaProducer(AbstractEventsStorage):
             value_serializer=lambda v: json.dumps(v).encode("utf-8")
         )
 
+    @contextmanager
     def create_session(self) -> Generator[KafkaSession, None, None]:
         yield KafkaSession(self._producer)
 

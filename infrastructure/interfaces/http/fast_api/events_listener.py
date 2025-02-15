@@ -1,9 +1,7 @@
 from types import ModuleType
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-
 from collections.abc import AsyncIterator
-
 from entities.upstream.metrics.abstract_events_listener import AbstractEventsListener
 from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
