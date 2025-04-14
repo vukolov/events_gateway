@@ -17,12 +17,12 @@ class MetricCreate(BaseModel):
 class MetricPublic(BaseModel):
     uuid: UUID
     name: str
-    group_name: str
+    group_name: str | None
     active: bool
 
     @staticmethod
     def from_entity(metric: MetricEntity) -> "MetricPublic":
         return MetricPublic(uuid=metric.uuid,
                             name=metric.name,
-                            group_name='?',
+                            group_name=metric.group_name,
                             active=metric.active)

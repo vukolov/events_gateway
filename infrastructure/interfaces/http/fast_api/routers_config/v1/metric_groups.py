@@ -30,11 +30,11 @@ def init_metric_groups_router(token_checker: TokenChecker, entities_repos_module
         metrics = metric_group_repo.get_list({})
         return [MetricGroupPublic.from_entity(metric) for metric in metrics]
 
-    @router.get("/{uuid}", response_model=MetricGroupPublic)
-    async def get_metric_group(group_uuid: UUID, safe_session: auth_dependency) -> MetricGroupPublic:
+    @router.get("/{uuid_}", response_model=MetricGroupPublic)
+    async def get_metric_group(uuid_: UUID, safe_session: auth_dependency) -> MetricGroupPublic:
         client, entities_storage_session = safe_session
         metric_group_repo = entities_repos_module.metric_group.MetricGroup(entities_storage_session)
-        metric_group = metric_group_repo.get_by_uuid(group_uuid)
+        metric_group = metric_group_repo.get_by_uuid(uuid_)
         return MetricGroupPublic.from_entity(metric_group)
 
     @router.post("/", response_model=MetricGroupPublic, status_code=status.HTTP_201_CREATED)

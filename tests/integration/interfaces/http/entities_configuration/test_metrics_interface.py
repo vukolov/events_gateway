@@ -1,10 +1,11 @@
 import os
 from uuid import UUID
+
+from adapters.storage.sql_models.metric_group import MetricGroup
 from tests.integration.interfaces.http.fixtures import *
 from entities.clients.external_client import ExternalClient as ClientEntity
 from entities.metrics.metric import Metric
 from application.usecases.auth import Auth
-from adapters.storage.sql_models.metric import Filters as MetricFilters
 from infrastructure.interfaces.http.fast_api.jwt_encoder import JwtEncoder
 from infrastructure.storages.entities.sql.repositories.metric import Metric as MetricRepo
 
@@ -59,7 +60,7 @@ def test_create_metric(client, monkeypatch):
 
     assert response_data == {
         "name": "test",
-        "group_name": "?",
+        "group_name": None,
         "active": False,
     }
 
@@ -80,4 +81,4 @@ def test_get_metrics_list(client, monkeypatch, mocker):
 
     assert response.status_code == 200
     response_data = response.json()
-    mock_get_list.assert_called_once_with({MetricFilters.FILTER_BY_GROUP_NAME: "test-group"})
+    mock_get_list.assert_called_once_with({MetricGroup.name: "test-group"})

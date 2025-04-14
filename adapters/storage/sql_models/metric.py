@@ -25,6 +25,7 @@ class Metric(AbstractModel, SQLModel, table=True):
                             uuid=self.uuid,
                             name=self.name,
                             group_id=self.group_id,
+                            group_name=self.group.name if self.group else None,
                             active=self.active)
 
     @staticmethod
@@ -34,6 +35,3 @@ class Metric(AbstractModel, SQLModel, table=True):
                       name=metric.name,
                       group_id=metric.group_id,
                       active=metric.active)
-
-class Filters:
-    FILTER_BY_GROUP_NAME: str = "group.name"

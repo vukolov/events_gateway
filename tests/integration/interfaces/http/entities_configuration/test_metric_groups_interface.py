@@ -44,6 +44,5 @@ def test_create_metric_group(client, monkeypatch):
 
     assert response_data == {
         "name": "test",
-        "group_name": "?",
         "active": False,
     }

@@ -20,12 +20,10 @@ class MetricGroupCreate(BaseModel):
 class MetricGroupPublic(BaseModel):
     uuid: UUID
     name: str
-    group_name: str
     active: bool
 
     @staticmethod
-    def from_entity(metric: MetricGroupEntity) -> "MetricGroupPublic":
-        return MetricGroupPublic(uuid=metric.uuid,
-                                 name=metric.name,
-                                 group_name='?',
-                                 active=metric.active)
+    def from_entity(metric_group: MetricGroupEntity) -> "MetricGroupPublic":
+        return MetricGroupPublic(uuid=metric_group.uuid,
+                                 name=metric_group.name,
+                                 active=metric_group.active)

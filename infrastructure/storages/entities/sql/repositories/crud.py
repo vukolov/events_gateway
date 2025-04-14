@@ -28,8 +28,17 @@ class Crud(AbstractCrud, metaclass=ABCMeta):
 
     def get_list(self, filters: dict[Any, Any]) -> list[AbstractBusinessEntity]:
         statement = select(self._model)
+        joined_models = set()
+
         for key, value in filters.items():
-            statement = statement.where(getattr(self._model, key) == value)
+            if hasattr(key, 'class_') and key.class_ != self._model:
+                rel_name = self._find_relationship_attr(key.class_)
+                if rel_name:
+                    if rel_name not in joined_models:
+                        statement = statement.join(getattr(self._model, rel_name))
+                        joined_models.add(rel_name)
+            statement = statement.where(key == value)
+
         models = self._sql_session.exec(statement).all()
         return [model.to_entity() for model in models]
 
@@ -60,3 +69,11 @@ class Crud(AbstractCrud, metaclass=ABCMeta):
 
     def delete_by_id(self, id_: int) -> None:
         ...
+
+    def _find_relationship_attr(self, related_class: Type[AbstractModel]) -> str | None:
+        for attr_name in dir(self._model):
+            attr = getattr(self._model, attr_name)
+            if hasattr(attr, 'property') and hasattr(attr.property, 'mapper'):
+                if attr.property.mapper.class_ == related_class:
+                    return attr_name
+        return None
