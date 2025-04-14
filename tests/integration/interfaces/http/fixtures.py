@@ -2,6 +2,7 @@ import importlib
 from contextlib import contextmanager
 import pytest
 from fastapi.testclient import TestClient
+from entities.storage_sessions.abstract_entities_storage_session import AbstractEntitiesStorageSession
 from entities.storages.abstract_entities_storage import AbstractEntitiesStorage
 from entities.storages.abstract_events_storage import AbstractEventsStorage
 from entities.storage_sessions.abstract_metric_events_storage_session import AbstractMetricEventsStorageSession
@@ -10,7 +11,7 @@ from infrastructure.interfaces.http.fast_api.events_listener import EventsListen
 
 @pytest.fixture
 def entities_storage_session(mocker):
-    mock = mocker.Mock(name='entities_storage_session')
+    mock = mocker.Mock(spec=AbstractEntitiesStorageSession)
     return mock
 
 

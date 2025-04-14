@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Any
 from uuid import UUID
 from entities.abstract_business_entity import AbstractBusinessEntity
 
@@ -10,6 +11,10 @@ class AbstractCrud(metaclass=ABCMeta):
 
     @abstractmethod
     def get_by_uuid(self, uuid_: UUID) -> AbstractBusinessEntity:
+        ...
+
+    @abstractmethod
+    def get_list(self, filters: dict[Any, Any]) -> list[AbstractBusinessEntity]:
         ...
 
     @abstractmethod

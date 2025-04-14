@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Any
 from abc import ABCMeta, abstractmethod
 from sqlmodel import select, SQLModel
 from uuid import UUID
@@ -25,6 +25,13 @@ class Crud(AbstractCrud, metaclass=ABCMeta):
         statement = select(self._model).where(self._model.uuid == uuid_)
         model = self._sql_session.exec(statement).one() # type: AbstractModel
         return model.to_entity()
+
+    def get_list(self, filters: dict[Any, Any]) -> list[AbstractBusinessEntity]:
+        statement = select(self._model)
+        for key, value in filters.items():
+            statement = statement.where(getattr(self._model, key) == value)
+        models = self._sql_session.exec(statement).all()
+        return [model.to_entity() for model in models]
 
     def add(self, entity: AbstractBusinessEntity) -> AbstractBusinessEntity:
         model = self._model.from_entity(entity)
