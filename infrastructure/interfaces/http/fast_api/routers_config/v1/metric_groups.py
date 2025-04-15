@@ -6,6 +6,7 @@ from entities.storage_sessions.abstract_entities_storage_session import Abstract
 from entities.clients.external_client import ExternalClient
 from entities.metrics.metric_group import MetricGroup as MetricGroupEntity
 from adapters.api.metrics.metric_group import MetricGroupCreate, MetricGroupPublic
+from adapters.storage.sql_models.metric_group import MetricGroup
 from infrastructure.interfaces.http.fast_api.routers_common.v1.auth import TokenChecker
 
 
@@ -21,13 +22,15 @@ def init_metric_groups_router(token_checker: TokenChecker, entities_repos_module
     ]
 
     @router.get("/", response_model=list[MetricGroupPublic])
-    async def list_metric_groups(safe_session: auth_dependency) -> list[MetricGroupPublic]:
+    async def list_metric_groups(safe_session: auth_dependency,
+                                 name: Annotated[str | None, Query(alias="name")] = None,
+                                 ) -> list[MetricGroupPublic]:
         client, entities_storage_session = safe_session
         metric_group_repo = entities_repos_module.metric_group.MetricGroup(entities_storage_session)
-        # filters = {}
-        # if group_name:
-        #     filters = {"group.name": group_name}
-        metrics = metric_group_repo.get_list({})
+        filters = {}
+        if name:
+            filters = {MetricGroup.name: name}
+        metrics = metric_group_repo.get_list(filters)
         return [MetricGroupPublic.from_entity(metric) for metric in metrics]
 
     @router.get("/{uuid_}", response_model=MetricGroupPublic)

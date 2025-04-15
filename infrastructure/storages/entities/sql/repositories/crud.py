@@ -39,7 +39,7 @@ class Crud(AbstractCrud, metaclass=ABCMeta):
                         joined_models.add(rel_name)
             statement = statement.where(key == value)
 
-        models = self._sql_session.exec(statement).all()
+        models = self._sql_session.exec(statement).unique().all()
         return [model.to_entity() for model in models]
 
     def add(self, entity: AbstractBusinessEntity) -> AbstractBusinessEntity:
